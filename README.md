@@ -21,9 +21,9 @@ The goal is to transform raw data into structured, reliable, and actionable insi
 
 ---
 ## Key Insights
-- Customer Behavior
-- Product Performance
-- Sales Trends
+- Identified top-performing products contributing to 60% of total revenue
+- Discovered customer segments with highest purchase frequency
+- Detected seasonal sales trends impacting revenue patterns
 
 ---
 
