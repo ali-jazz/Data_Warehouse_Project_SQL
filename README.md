@@ -52,6 +52,12 @@ The goal is to transform raw data into structured, reliable, and actionable insi
 - Implemented data validation checks before loading
 
 ---
+##  Results
+- Built a fully functional Data Warehouse from raw CSV data
+- Improved data consistency and usability for analytics
+- Enabled faster querying through structured data modeling
+
+---
 ##  Repository Structure
 
 ---
