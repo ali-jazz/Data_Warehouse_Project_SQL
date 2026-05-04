@@ -28,7 +28,7 @@ The goal is to transform raw data into structured, reliable, and actionable insi
 ---
 
 ##  Tech Stack
-- SQL Server
+- MySQL
 - T-SQL
 - SSMS (SQL Server Management Studio)
 
