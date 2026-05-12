@@ -1,1 +1,94 @@
+/*
+=======================================================================
+Create Intermediate Table - CRM Product Information
+=======================================================================
+Script Purpose:
+    This script creates a cleaned intermediate product table from the
+    raw CRM product staging table.
 
+    The purpose of this transformation is to:
+    - Load raw product data from the staging layer
+    - Identify duplicate or missing product IDs
+    - Validate product start and end dates
+    - Extract product category ID from the product key
+    - Extract product order key from the product key
+    - Trim product names
+    - Replace missing product costs with 0
+    - Standardize product line values
+    - Recalculate product end dates using the next product start date
+
+Source Table:
+    staging_crm_prd_info
+
+Output Table:
+    inter_crm_prd_info_clean
+
+Notes:
+    - Product end dates are derived using the next available product start date.
+    - Product line codes are mapped to readable business labels.
+=======================================================================
+*/
+
+-- Step 1: Load raw CRM product data into the intermediate layer
+DROP TABLE IF EXISTS inter_crm_prd_info;
+
+CREATE TABLE inter_crm_prd_info AS
+SELECT
+    *,
+    NOW() AS dwh_create_date
+FROM staging_crm_prd_info;
+
+
+-- Step 2: Check for duplicate or missing product IDs
+SELECT 
+    prd_id,
+    COUNT(*) AS duplicate_count
+FROM inter_crm_prd_info
+GROUP BY prd_id
+HAVING COUNT(*) > 1 
+   OR prd_id IS NULL;
+
+
+-- Step 3: Check for invalid product date ranges
+SELECT
+    *
+FROM inter_crm_prd_info
+WHERE prd_start_dt > prd_end_dt;
+
+
+-- Step 4: Create final cleaned CRM product table
+DROP TABLE IF EXISTS inter_crm_prd_info_clean;
+
+CREATE TABLE inter_crm_prd_info_clean AS 
+SELECT
+    prd_id,
+    prd_key,
+
+    -- Extract category ID from product key
+    REPLACE(SUBSTRING(prd_key, 1, 5), '-', '_') AS cat_id,
+
+    -- Extract product order key from product key
+    SUBSTRING(prd_key, 7) AS ord_key_prd,
+
+    TRIM(prd_nm) AS prd_nm,
+    IFNULL(prd_cost, 0) AS prd_cost,
+
+    CASE UPPER(TRIM(prd_line))
+        WHEN 'M' THEN 'Mountain'
+        WHEN 'R' THEN 'Road'
+        WHEN 'S' THEN 'Other Sales'
+        WHEN 'T' THEN 'Touring'
+        ELSE 'N/A'
+    END AS prd_line,
+
+    prd_start_dt,
+
+    DATE_SUB(
+        LEAD(prd_start_dt) OVER (
+            PARTITION BY prd_key 
+            ORDER BY prd_start_dt
+        ),
+        INTERVAL 1 DAY
+    ) AS prd_end_dt
+
+FROM inter_crm_prd_info;
