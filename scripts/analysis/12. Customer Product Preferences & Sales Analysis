@@ -1,0 +1,155 @@
+/*
+=======================================================================
+Create Analytical Table - Customer Product Preferences & Sales Analysis
+=======================================================================
+Script Purpose:
+    This script combines customer order data with product category data
+    to analyze customer product preferences and sales performance across
+    demographic segments.
+
+    The goal is to:
+    - Link customer profiles with purchased products
+    - Analyze product category preferences by country and gender
+    - Identify the most ordered product subcategory by country and gender
+    - Analyze average customer age across product segments
+    - Evaluate product performance using sales and quantity metrics
+
+Source Tables:
+    - cust_order (customer orders and demographics)
+    - dim_product (product and category information)
+
+Output Table:
+    - cust_pro
+
+Notes:
+    - INNER JOIN is used to ensure only valid product transactions are included
+    - Aggregations are used to derive business insights across segments
+    - Window functions (ROW_NUMBER) are used to identify top categories
+    - Sales analysis includes both revenue (sls_sales) and volume (sls_quantity)
+=======================================================================
+*/
+USE datawarehouse;
+
+-- Step 1: Create customer-product analytical table by joining customer orders with product attributes
+DROP TABLE IF EXISTS cust_pro;
+
+CREATE TABLE cust_pro AS
+SELECT 
+    co.sls_prd_key,
+    co.sls_quantity,
+    co.sls_price,
+    co.sls_sales,
+    co.cst_fullname,
+    co.cst_marital_status,
+    co.cst_gndr,
+    co.cst_age,
+    co.cntry,
+    pc.prd_nm,
+    pc.prd_line,
+    pc.cat,
+    pc.subcat,
+    pc.maintenance
+FROM cust_order AS co
+JOIN dim_product AS pc
+    ON co.sls_prd_key = pc.prd_key;
+
+
+-- Step 2: Order distribution by country and product subcategory
+SELECT 
+    cntry,
+    subcat,
+    COUNT(*) AS order_count
+FROM cust_pro
+GROUP BY cntry, subcat
+ORDER BY cntry, subcat;
+
+
+-- Step 3: Most ordered product subcategory by country
+SELECT 
+    cntry,
+    subcat,
+    order_count
+FROM (
+    SELECT 
+        cntry,
+        subcat,
+        COUNT(*) AS order_count,
+        ROW_NUMBER() OVER (
+            PARTITION BY cntry 
+            ORDER BY COUNT(*) DESC
+        ) AS rn
+    FROM cust_pro
+    GROUP BY cntry, subcat
+) t
+WHERE rn = 1;
+
+
+-- Step 4: Order distribution by gender and product subcategory
+SELECT 
+    cst_gndr,
+    subcat,
+    COUNT(*) AS order_count
+FROM cust_pro
+GROUP BY cst_gndr, subcat
+ORDER BY cst_gndr, subcat;
+
+
+-- Step 5: Most ordered product subcategory by gender
+SELECT 
+    cst_gndr,
+    subcat,
+    order_count 
+FROM (
+    SELECT 
+        cst_gndr,
+        subcat,
+        COUNT(*) AS order_count,
+        ROW_NUMBER() OVER (
+            PARTITION BY cst_gndr
+            ORDER BY COUNT(*) DESC
+        ) AS rn
+    FROM cust_pro
+    GROUP BY cst_gndr, subcat
+) AS t
+WHERE rn = 1;
+
+
+-- Step 6: Average customer age by gender and product subcategory
+SELECT 
+    cst_gndr,
+    subcat,
+    ROUND(AVG(cst_age), 0) AS avg_age
+FROM cust_pro
+GROUP BY cst_gndr, subcat
+ORDER BY cst_gndr;
+
+
+-- Step 7: Average customer age by marital status and product subcategory
+SELECT 
+    cst_marital_status,
+    subcat,
+    ROUND(AVG(cst_age), 0) AS avg_age
+FROM cust_pro
+GROUP BY cst_marital_status, subcat
+ORDER BY cst_marital_status;
+
+
+-- Step 8: Average customer age by gender, marital status, and product subcategory
+SELECT 
+    cst_gndr,
+    cst_marital_status,
+    subcat,
+    ROUND(AVG(cst_age), 0) AS avg_age
+FROM cust_pro
+GROUP BY cst_gndr, cst_marital_status, subcat
+ORDER BY cst_gndr, cst_marital_status;
+
+
+-- Step 9: Product performance analysis by subcategory
+SELECT 
+    subcat,
+    SUM(sls_sales) AS total_sales,
+    SUM(sls_quantity) AS total_quantity
+FROM cust_pro
+GROUP BY subcat
+ORDER BY total_sales DESC;
