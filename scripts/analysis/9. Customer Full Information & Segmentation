@@ -53,9 +53,6 @@ LEFT JOIN inter_erp_loc_a101_clean AS l
     ON c.cst_key = l.cid;
     
 
-
-
-
 -- Step 2: Customer distribution by gender
 SELECT
     cst_gndr,
@@ -91,3 +88,21 @@ SELECT
     2) AS percentage_cust
 FROM dim_customer
 GROUP BY cntry;
+
+
+-- Step 5: Customer distribution by age
+SELECT 
+    CASE
+        WHEN cst_age IS NULL THEN 'Unknown'
+        WHEN cst_age < 30 THEN '<30'
+        WHEN cst_age >= 30 AND cst_age < 40 THEN '[30;40['
+        WHEN cst_age >= 40 AND cst_age < 50 THEN '[40;50['
+        WHEN cst_age >= 50 AND cst_age < 60 THEN '[50;60['
+        WHEN cst_age >= 60 AND cst_age < 70 THEN '[60;70['
+        WHEN cst_age >= 70 THEN '70+'
+    END AS age_group,
+    COUNT(*) AS customer_count,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM dim_customer), 2) AS customer_percentage
+FROM dim_customer
+GROUP BY age_group
+ORDER BY customer_count DESC ;
