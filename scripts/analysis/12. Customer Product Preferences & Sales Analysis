@@ -88,10 +88,12 @@ WHERE rn = 1;
 SELECT 
     cst_gndr,
     subcat,
-    COUNT(*) AS order_count
+    COUNT(*) AS order_count,
+    SUM(sls_sales) AS total_sales,
+    ROUND(SUM(sls_sales)/(SELECT SUM(sls_sales) FROM cust_pro)*100,2) AS sale_percentage
 FROM cust_pro
 GROUP BY cst_gndr, subcat
-ORDER BY cst_gndr, subcat;
+ORDER BY total_sales desc, cst_gndr, subcat;
 
 
 -- Step 5: Most ordered product subcategory by gender
@@ -139,17 +141,26 @@ SELECT
     cst_gndr,
     cst_marital_status,
     subcat,
-    ROUND(AVG(cst_age), 0) AS avg_age
+    ROUND(AVG(cst_age), 0) AS avg_age,
+	SUM(sls_sales) AS total_sales,
+    ROUND(SUM(sls_sales)/(SELECT SUM(sls_sales) FROM cust_pro)*100,2) AS sale_percentage
 FROM cust_pro
 GROUP BY cst_gndr, cst_marital_status, subcat
-ORDER BY cst_gndr, cst_marital_status;
+ORDER BY total_sales DESC, cst_gndr, cst_marital_status;
 
 
 -- Step 9: Product performance analysis by subcategory
 SELECT 
     subcat,
     SUM(sls_sales) AS total_sales,
-    SUM(sls_quantity) AS total_quantity
+    SUM(sls_quantity) AS total_quantity,
+    ROUND(
+        SUM(sls_sales) / (SELECT SUM(sls_sales) FROM cust_pro) * 100, 
+    2) AS sales_percentage,
+    ROUND(
+        SUM(SUM(sls_sales)) OVER (ORDER BY SUM(sls_sales) DESC)
+        / (SELECT SUM(sls_sales) FROM cust_pro) * 100,
+    2) AS cumulative_sales_percentage
 FROM cust_pro
 GROUP BY subcat
 ORDER BY total_sales DESC;
