@@ -164,8 +164,8 @@ data-warehouse-project/
 │
 ├── docs/                               # Project documentation and architecture details
 │   ├── data_catalog.md                 # Catalog of datasets, including field descriptions and metadata
-│   ├── data_models.drawio              # Draw.io file for data models (star schema)
-│   ├── data_integration.drawio         # Draw.io file to display how the tables are related
+│   ├── data_models.png                 # screenshot of Draw.io file of data models (star schema)
+│   ├── data_integration.png            # screenshot of Draw.io file to display how the tables are related
 │
 ├── powerbi/                            # PowerBI Dashboad screenshots
 │  ├── dashboard.png                    
