@@ -53,6 +53,7 @@ LEFT JOIN inter_erp_loc_a101_clean AS l
     ON c.cst_key = l.cid;
     
 
+
 -- Step 2: Customer distribution by gender
 SELECT
     cst_gndr,
@@ -88,7 +89,6 @@ SELECT
     2) AS percentage_cust
 FROM dim_customer
 GROUP BY cntry;
-
 
 -- Step 5: Customer distribution by age
 SELECT 
