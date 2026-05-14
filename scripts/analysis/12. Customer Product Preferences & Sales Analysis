@@ -11,7 +11,7 @@ Script Purpose:
     - Link customer profiles with purchased products
     - Analyze product category preferences by country and gender
     - Identify the most ordered product subcategory by country and gender
-    - Analyze average customer age across product segments
+    - Analyze customer age distribution using age groups across product segments
     - Evaluate product performance using sales and quantity metrics
 
 Source Tables:
@@ -25,6 +25,7 @@ Notes:
     - INNER JOIN is used to ensure only valid product transactions are included
     - Aggregations are used to derive business insights across segments
     - Window functions (ROW_NUMBER) are used to identify top categories
+    - Customer age is segmented into groups (e.g., <30, 30–40, etc.) for more meaningful analysis
     - Sales analysis includes both revenue (sls_sales) and volume (sls_quantity)
 =======================================================================
 */
@@ -58,10 +59,12 @@ JOIN dim_product AS pc
 SELECT 
     cntry,
     subcat,
-    COUNT(*) AS order_count
+    COUNT(*) AS order_count,
+    SUM(sls_sales) AS total_sales,
+    ROUND(SUM(sls_sales) / (SELECT SUM(sls_sales) FROM cust_pro)*100,2)  AS sales_percentage
 FROM cust_pro
-GROUP BY cntry, subcat
-ORDER BY cntry, subcat;
+GROUP BY  cntry, subcat
+ORDER BY total_sales DESC, cntry, subcat;
 
 
 -- Step 3: Most ordered product subcategory by country
@@ -116,36 +119,64 @@ FROM (
 WHERE rn = 1;
 
 
--- Step 6: Average customer age by gender and product subcategory
+-- Step 6: Customer group age by gender and product subcategory
 SELECT 
     cst_gndr,
     subcat,
-    ROUND(AVG(cst_age), 0) AS avg_age
+	CASE
+        WHEN cst_age IS NULL THEN 'Unknown'
+        WHEN cst_age < 30 THEN '<30'
+        WHEN cst_age >= 30 AND cst_age < 40 THEN '[30;40['
+        WHEN cst_age >= 40 AND cst_age < 50 THEN '[40;50['
+        WHEN cst_age >= 50 AND cst_age < 60 THEN '[50;60['
+        WHEN cst_age >= 60 AND cst_age < 70 THEN '[60;70['
+        WHEN cst_age >= 70 THEN '70+'
+	END AS age_group,
+    SUM(sls_sales) AS total_sales,
+    ROUND(SUM(sls_sales)/(SELECT SUM(sls_sales) FROM cust_pro)*100,2) AS sale_percentage
 FROM cust_pro
-GROUP BY cst_gndr, subcat
-ORDER BY cst_gndr;
+GROUP BY cst_gndr, subcat, age_group
+ORDER BY total_sales DESC, cst_gndr;
 
 
 -- Step 7: Average customer age by marital status and product subcategory
 SELECT 
     cst_marital_status,
     subcat,
-    ROUND(AVG(cst_age), 0) AS avg_age
+    CASE
+        WHEN cst_age IS NULL THEN 'Unknown'
+        WHEN cst_age < 30 THEN '<30'
+        WHEN cst_age >= 30 AND cst_age < 40 THEN '[30;40['
+        WHEN cst_age >= 40 AND cst_age < 50 THEN '[40;50['
+        WHEN cst_age >= 50 AND cst_age < 60 THEN '[50;60['
+        WHEN cst_age >= 60 AND cst_age < 70 THEN '[60;70['
+        WHEN cst_age >= 70 THEN '70+'
+	END AS age_group,
+    SUM(sls_sales) AS total_sales,
+    ROUND(SUM(sls_sales)/(SELECT SUM(sls_sales) FROM cust_pro)*100,2) AS sale_percentage
 FROM cust_pro
-GROUP BY cst_marital_status, subcat
-ORDER BY cst_marital_status;
+GROUP BY cst_marital_status, subcat, age_group
+ORDER BY total_sales DESC, cst_marital_status;
 
 
--- Step 8: Average customer age by gender, marital status, and product subcategory
+-- Step 8: Customer age by gender, marital status, and product subcategory
 SELECT 
     cst_gndr,
     cst_marital_status,
     subcat,
-    ROUND(AVG(cst_age), 0) AS avg_age,
+   CASE
+        WHEN cst_age IS NULL THEN 'Unknown'
+        WHEN cst_age < 30 THEN '<30'
+        WHEN cst_age >= 30 AND cst_age < 40 THEN '[30;40['
+        WHEN cst_age >= 40 AND cst_age < 50 THEN '[40;50['
+        WHEN cst_age >= 50 AND cst_age < 60 THEN '[50;60['
+        WHEN cst_age >= 60 AND cst_age < 70 THEN '[60;70['
+        WHEN cst_age >= 70 THEN '70+'
+	END AS age_group,
 	SUM(sls_sales) AS total_sales,
     ROUND(SUM(sls_sales)/(SELECT SUM(sls_sales) FROM cust_pro)*100,2) AS sale_percentage
 FROM cust_pro
-GROUP BY cst_gndr, cst_marital_status, subcat
+GROUP BY age_group, cst_gndr, cst_marital_status, subcat
 ORDER BY total_sales DESC, cst_gndr, cst_marital_status;
 
 
