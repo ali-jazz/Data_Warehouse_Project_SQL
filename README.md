@@ -157,7 +157,26 @@ An interactive dashboard was built using **Power BI** to visualize insights.
 
 ---
 ##  Repository Structure
-
+data-warehouse-project/
+│
+├── datasets/                           # Raw datasets used for the project (ERP and CRM data)
+│
+├── docs/                               # Project documentation and architecture details
+│   ├── data_catalog.md                 # Catalog of datasets, including field descriptions and metadata
+│   ├── data_models.drawio              # Draw.io file for data models (star schema)
+│   ├── data_integration.drawio         # Draw.io file to display how the tables are related
+│
+├── powerbi/                            # PowerBI Dashboad screenshots
+│  ├── dashboard.png                    
+│  ├── filter.png                      
+│
+├── scripts/                            # SQL scripts for ETL and transformations
+│   ├── staging/                        # Scripts for extracting and loading raw data
+│   ├── intermediate/                   # Scripts for cleaning and transforming data
+│   ├── analysis/                       # Scripts for creating analytical models
+│
+├── README.md                           # Project overview and instructions
+├── LICENSE                             # License information for the repository
 ---
 ##  License
 
