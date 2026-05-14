@@ -1,61 +1,159 @@
-# Data Warehouse Project
+# Data Warehouse & Analytics Project
 
-##  Overview
-This project demonstrates the design and implementation of a modern Data Warehouse using SQL Server. It showcases best practices in data modeling, ETL processes, and analytical reporting.
+## Overview
+This project demonstrates the end-to-end design and implementation of a modern Data Warehouse, combined with business-oriented analytics and interactive dashboards.
 
-The goal is to transform raw data into structured, reliable, and actionable insights that support data-driven decision-making.
+The objective is to transform raw CRM and ERP data into structured, reliable, and actionable insights to support data-driven decision-making.
 
-1. **Data Architecture**: Designing a Modern Data Warehouse Using Medallion Architecture **Staging**, **Intermediate**, and **Data Marts** layers.
-2. **ETL Pipelines**: Extracting, transforming, and loading data from source systems into the warehouse.
-3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries.
-4. **Analytics & Reporting**: Creating SQL-based reports and dashboards for actionable insights.
-   
----
+This project covers:
 
-## Tasks
-- Import data from two source systems (ERP and CRM) provided as CSV files.
-- Cleanse and resolve data quality issues prior to analysis.
-- Combine both sources into a single, user-friendly data model designed for analytical queries.
-- Focus on the latest dataset only; historization of data is not required.
-- Provide clear documentation of the data model to support both business stakeholders and analytics teams.
-
----
-## Key Insights
-- Identified top-performing products contributing to 60% of total revenue
-- Discovered customer segments with highest purchase frequency
-- Detected seasonal sales trends impacting revenue patterns
+- **Data Architecture**: Implementation of a Medallion Architecture (Staging → Intermediate → Data Marts)
+- **ETL Pipelines**: Data extraction, cleaning, transformation, and integration
+- **Data Modeling**: Star schema design with fact and dimension tables
+- **Analytics & Visualization**: SQL analysis and interactive dashboards using Power BI
 
 ---
 
-##  Tech Stack
-- MySQL
-- T-SQL
-- SSMS (SQL Server Management Studio)
+## Data Architecture
+
+The data pipeline follows a layered approach:
+
+### Staging Layer
+- Raw data ingestion from CSV files (CRM & ERP systems)
+
+### Intermediate Layer
+- Data cleaning, standardization, and transformation
+- Deduplication using window functions
+- Data reconciliation between systems
+
+### Data Mart Layer
+- Creation of analytical tables:
+  - `dim_customer`
+  - `dim_product`
+  - `fact_sales`
+- Optimized for reporting and BI tools
 
 ---
 
-##  Data Architecture
-- Staging Layer: Raw data ingestion. Data is ingested from CSV Files into SQL Server Database.
-- Intermediate Layer: Cleaned and structured data, and normalization processes to prepare data for analysis.
-- Data Marts: Business-oriented datasets for analysis
+## ETL & Data Modeling
+
+### Data Sources
+- CRM System:
+  - Customer information
+  - Sales transactions
+  - Product data
+- ERP System:
+  - Customer demographics (birthdate)
+  - Customer location
+  - Product categories
+
+### Key Transformations
+- Standardization of keys across systems
+- Deduplication using `ROW_NUMBER()`
+- Handling missing values (Unknown categories/products)
+- Creation of derived attributes:
+  - Customer age
+  - Product status (Active / Inactive / Unknown)
+  - Customer segmentation (age groups)
 
 ---
-##  Data Challenges
-- Missing values in customer and sales data
-- Inconsistent product naming across ERP and CRM systems
-- Duplicate records across sources
-- Date format inconsistencies
 
-### Solutions
-- Applied data standardization and normalization techniques
-- Used deduplication logic with window functions
-- Implemented data validation checks before loading
+## Star Schema
+
+The final model follows a **star schema**:
+
+- **Fact Table**
+  - `fact_sales`: transactional data
+
+- **Dimension Tables**
+  - `dim_customer`: customer attributes
+  - `dim_product`: product and category hierarchy
+
+This structure ensures:
+- High performance for analytical queries
+- Clear separation between facts and dimensions
+- Compatibility with BI tools
 
 ---
-##  Results
-- Built a fully functional Data Warehouse from raw CSV data
-- Improved data consistency and usability for analytics
-- Enabled faster querying through structured data modeling
+
+## Business Questions & Insights
+
+This project answers key business questions such as:
+
+### Product Performance
+- Which products generate the most revenue?
+- Which product categories dominate sales?
+- What are the top-selling products?
+
+### Market Analysis
+- Which countries generate the highest revenue?
+- How is revenue distributed geographically?
+
+### Customer Segmentation
+- Which age groups contribute most to revenue?
+- Are there differences in purchasing behavior by gender?
+- How does marital status impact sales?
+
+---
+
+## Power BI Dashboard
+
+An interactive dashboard was built using **Power BI** to visualize insights.
+
+### Key Features
+- KPI Cards:
+  - Total Revenue
+  - Total Quantity Sold
+- Sales by Country (Top markets)
+- Product Category & Subcategory Analysis
+- Top 10 Best-Selling Products
+- Customer Segmentation:
+  - Age groups
+  - Gender
+  - Marital status
+- Interactive **slicers**:
+  - Country
+  - Product category
+  - Age group
+  - Marital status
+
+### Insights from Dashboard
+- A small number of products drive a large portion of revenue
+- The **Bikes category dominates total sales**
+- Customers aged **40–60 represent the most valuable segment**
+- Revenue is concentrated in a few key countries (US, Australia)
+
+---
+
+## Data Challenges
+
+- Missing values in customer and product data
+- Inconsistent product keys across systems
+- Duplicate records
+- Products present in sales but missing from product master data
+
+### Solutions Implemented
+- Data standardization and normalization
+- Deduplication using window functions (`ROW_NUMBER()`)
+- Creation of "Unknown Product" records to ensure referential integrity
+- Validation of joins between fact and dimension tables
+
+---
+
+## Results
+
+- Built a fully functional Data Warehouse from raw CSV files
+- Implemented a clean and scalable star schema
+- Ensured data consistency and integrity across systems
+- Delivered an interactive dashboard for business insights
+
+---
+
+## Tech Stack
+
+- **MySQL** (Data Warehouse & ETL)
+- **SQL (Advanced)** (Transformations & modeling)
+- **Power BI** (Data visualization & dashboarding)
 
 ---
 ##  Repository Structure
