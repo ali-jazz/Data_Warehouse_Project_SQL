@@ -40,7 +40,6 @@ The model follows a **star schema**, consisting of **dimension tables** and a **
 
 ## dim_product
 - **Purpose:** Stores product attributes and category hierarchy for analysis.
-- **Columns:**
   
 | Column | Data Type | Description |
 |---|---|---|
